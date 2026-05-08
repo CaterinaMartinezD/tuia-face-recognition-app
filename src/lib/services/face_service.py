@@ -12,6 +12,7 @@ from lib.schemas import EmbeddingRecord, FaceDetection, PredictResult, AlignedFa
 from lib.storage.base import EmbeddingStoreProtocol
 import os 
 import logging
+from insightface.app import FaceAnalysis
 
 logger = logging.getLogger(__name__)
 
@@ -83,9 +84,6 @@ class FaceService:
         # BGR uint8 (InsightFace / OpenCV convention)
         return image
 
-
-#------------------------------------------------------------------------------------------------------------------
-
     def detect_faces(self, image: np.ndarray) -> list[tuple[int, int, int, int]]:
         """
         Detecta rostros y guarda los keypoints en memoria para usarlos en la alineación.
@@ -111,31 +109,10 @@ class FaceService:
 
     def align_face(self, image: np.ndarray, box: tuple[int, int, int, int]) -> AlignedFace:
         """
-        Recupera los keypoints de la detección y realiza la alineación de 112x112.
+        Crop using box (x1, y1, x2, y2) and run FaceAnalysis on the crop.
+        Return an AlignedFace object.
         """
-        from insightface.utils import face_align
-        
-        target_kps = None
-        
-        # Buscamos qué keypoints corresponden a esta caja específica
-        if hasattr(self, '_current_bboxes') and hasattr(self, '_current_kpss'):
-            for i, b in enumerate(self._current_bboxes):
-                # Comparamos con una tolerancia de 2 píxeles por los redondeos
-                if abs(int(b[0]) - box[0]) <= 2 and abs(int(b[1]) - box[1]) <= 2:
-                    target_kps = self._current_kpss[i]
-                    break
-                    
-        #  Hacemos el recorte
-        if target_kps is not None:
-            # Alineación matemática perfecta para MobileFaceNet
-            aligned_img = face_align.norm_crop(image, target_kps)
-        else:
-            # Fallback de seguridad por si se pasa una caja manual
-            x1, y1, x2, y2 = box
-            aligned_img = image[y1:y2, x1:x2]
-            
-        return AlignedFace(image=aligned_img, keypoints=target_kps)
-
+        raise NotImplementedError("Not implemented")
 
     def extract_embedding_from_face(self, face: AlignedFace) -> list[float]:
         """
