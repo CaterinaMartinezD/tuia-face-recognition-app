@@ -12,5 +12,6 @@ model/*
 data/lfw-dataset
 data/*.csv
 .DS_Store
-feature_store.json
+*.json
 *.zip
+data/dataset_propio
