@@ -12,6 +12,7 @@ from lib.schemas import EmbeddingRecord, FaceDetection, PredictResult, AlignedFa
 from lib.storage.base import EmbeddingStoreProtocol
 import os 
 import logging
+from insightface.app import FaceAnalysis
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +87,7 @@ class FaceService:
 
 #------------------------------------------------------------------------------------------------------------------
 
+
     def detect_faces(self, image: np.ndarray) -> list[tuple[int, int, int, int]]:
         """
         Detecta rostros y guarda los keypoints en memoria para usarlos en la alineación.
@@ -134,7 +136,7 @@ class FaceService:
             x1, y1, x2, y2 = box
             aligned_img = image[y1:y2, x1:x2]
             
-        return AlignedFace(image=aligned_img, keypoints=target_kps)
+        return AlignedFace(image=aligned_img, keypoints=target_kps, bbox=box)
 
 
     def extract_embedding_from_face(self, face: AlignedFace) -> list[float]:
